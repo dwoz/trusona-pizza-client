@@ -20,6 +20,9 @@
       #pizzas .card {
         margin: 10px;
       }
+      footer {
+        text-align: center;
+      }
     </style>
     <script
       src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -59,24 +62,17 @@
           }
           return url.replace(/%ID%/, id);
         },
+        'addToppingCb': function(data) {
+           var item = $('<option>').attr({'value': data.id}).text(data.name);
+           this.toppings.append(item);
+           this.updateToppings();
+        },
         // returns an Array of toppings
-        'addTopping': function(name, callback) {
-          var data = {'topping': {'name': name}};
-          var client = this;
-          if (callback !== undefined) {
-            callback = callback.bind(this);
-          };
-          $.post(
-            this.url('toppings'),
-            data,
-            function(data) {
-              var item = $('<option>').attr({'value': data.id}).text(data.name);
-              client.toppings.append(item);
-              if (callback !== undefined) {
-                callback(data);
-              };
-            }
-          );
+        'addTopping': function(evt) {
+          var input = $("#topping");
+          var data = {'topping': {'name': input.val()}};
+          input.val('');
+          $.post(this.url('toppings'), data, this.addToppingCb.bind(this));
         },
         'addPizzaCb': function(data) {
           var pizzas = $("#pizzas");
@@ -101,9 +97,14 @@
             };
           }
         },
-        'addPizza': function(name, description, callback) {
+        'addPizza': function() {
+          var name = $("#pizza").val();
+          var description = $("#pizza-description").val();
           var data = {'pizza': {'name': name, 'description': description}};
           $.post(this.url('pizzas'), data, this.addPizzaCb.bind(this));
+          $("#pizza").val('');
+          $("#pizza-description").val('');
+
         },
         'addPizzaTopping': function(evt) {
           var pizza_id = evt.data.id;
@@ -259,17 +260,8 @@
        */
       p = pizzaClient('http://192.168.99.100:3000');
       $(document).ready(function() {
-        $('#add-topping').click(function() {
-          var input = $("#topping");
-          p.addTopping(input.val(), p.updateToppings);
-        });
-        $('#add-pizza').click(function() {
-          var input = $("#pizza");
-          p.addPizza($('#pizza').val(), $('#pizza-description').val());
-        });
-        $('#pizzas').each(function(idx, div) {
-          $(div).find('a[name=name]').click(p.togglePizzaInfo.bind(div));
-        });
+        $('#add-topping').click(p.addTopping.bind(p));
+        $('#add-pizza').click(p.addPizza.bind(p));
         p.updateToppings();
         p.updatePizzas();
       });
@@ -279,7 +271,7 @@
     <header>
       <h1>Pizza Client</h1>
     </header>
-    <div id="pizzaClient" class="containr-fluid">
+    <div id="pizzaClient" class="container-fluid">
       <ul class="nav nav-tabs">
         <li class="nav-item"><a href="#pizzas-tab" data-toggle="tab" class="nav-link active">Pizzas</a></li>
         <li class="nav-item"><a href="#toppings-tab" data-toggle="tab" class="nav-link">Toppings</a></li>
@@ -354,5 +346,8 @@
         </div>
       </div>
     </div>
+    <footer>
+      &#9400; 2017 Pizza Cient
+    </footer>
   </body>
 </html>

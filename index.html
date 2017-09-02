@@ -265,6 +265,49 @@
         p.updateToppings();
         p.updatePizzas();
       });
+      var client_info = {
+        "client_name": "Trusona Pizza Client - Daniel Wozniak",
+        "client_id": "",
+        "client_secret": "",
+        "subject_type": "pairwise",
+        "client_secret_expires_at": 0,
+        "callback_url": "http://trusona-pizza-client.woz.io",
+        "authorization_url": "https://idp.trusona.com/authorizations/openid",
+        "token_validation_url": "https://idp.trusona.com/openid/token",
+        "response_type": "id_token token",
+        "scope": "openid profile email",
+      }
+      generateState = function() {
+        var crypto = window.crypto || window.msCrypto;
+        var buf = new Uint8Array(8);
+        var k = ''
+        crypto.getRandomValues(buf);
+        for (var x = 0; x < 8; x ++) {
+          k += ("00" + buf[x]).slice(-2);
+        };
+        return k;
+      };
+      authorizationUrl = function() {
+        var state = arguments[0] || '';
+        var nonce = arguments[1] || '';
+        var url= client_info.authorization_url + '?' +
+          'client_id=' + encodeURIComponent(client_info.client_id) + '&' +
+          'redirect_uri=' + encodeURIComponent(client_info.callback_url) + '&' +
+          'response_type=' + encodeURIComponent(client_info.response_type) + '&' +
+          'scope=' + encodeURIComponent(client_info.scope);
+        if (nonce != '') {
+          url += '&nonce=' + nonce;
+        }
+        if (state != '') {
+          url += '&state=' + state;
+        }
+        /* This is implied by our oidc provider at the moment.
+        if( performSilently ) {
+          url = url + "&prompt=none";
+        }
+        */
+        return url;
+      };
     </script>
   </head>
   <body>

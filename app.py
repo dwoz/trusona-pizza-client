@@ -16,11 +16,10 @@ DEFAULTS = {
     'AUTH_URL': 'https://idp.trusona.com/authorizations/openid',
     'TOKEN_URL': 'https://idp.trusona.com/openid/token',
     'USERINFO_URL':  'https://idp.trusona.com/openid/userinfo',
-    #'REDIRECT_URI': 'http://trusona-pizza-client.woz.io/oidc/callback',
     'REGISTRATION_URI': 'https://idp.trusona.com/openid/clients',
     'CLIENT_ID': os.environ.get('CLIENT_ID', ''),
     'CLIENT_SECRET': os.environ.get('CLIENT_SECRET', ''),
-    'SECRET_KEY': os.environ.get('APP_SECRET',  base64.b64encode(os.urandom(36))),
+    'SECRET_KEY': os.environ.get('SECRET_KEY',  base64.b64encode(os.urandom(36))),
     'DEBUG': False,
     'AUTH_ENABLED': True,
 }

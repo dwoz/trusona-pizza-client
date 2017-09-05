@@ -1,11 +1,14 @@
 import base64
 import os
-from urllib.parse import urlencode
-from flask import Flask, request, session, redirect, url_for, Blueprint
+from urllib.parse import urlencode, urlparse, ParseResult
+from flask import Flask, request, session, redirect, url_for, Blueprint, abort
 import webargs
 import requests
 import jwt
 import yaml
+import json
+from functools import wraps
+from flask import g, request, redirect, url_for
 
 
 DEFAULTS = {
@@ -13,7 +16,8 @@ DEFAULTS = {
     'AUTH_URL': 'https://idp.trusona.com/authorizations/openid',
     'TOKEN_URL': 'https://idp.trusona.com/openid/token',
     'USERINFO_URL':  'https://idp.trusona.com/openid/userinfo',
-    'REDIRECT_URI': 'http://trusona-pizza-client.woz.io/oidc/callback',
+    #'REDIRECT_URI': 'http://trusona-pizza-client.woz.io/oidc/callback',
+    'REGISTRATION_URI': 'https://idp.trusona.com/openid/clients',
     'CLIENT_ID': os.environ.get('CLIENT_ID', ''),
     'CLIENT_SECRET': os.environ.get('CLIENT_SECRET', ''),
     'SECRET_KEY': os.environ.get('APP_SECRET',  base64.b64encode(os.urandom(36))),
@@ -25,7 +29,7 @@ DEFAULTS = {
 app = Flask(__name__, static_folder='')
 
 
-def configure(app, paths=['app.yml', '.odic-creds.yml'], defaults=DEFAULTS):
+def configure(app, paths=['app.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
     app.config.update(defaults)
     for path in paths:
         try:
@@ -33,6 +37,18 @@ def configure(app, paths=['app.yml', '.odic-creds.yml'], defaults=DEFAULTS):
                 app.config.update(yaml.safe_load(fp.read()))
         except FileNotFoundError as exc:
             app.logger.warn("Config file not found: %s", path)
+
+
+def url_for_redirect(scheme=None):
+    '''
+    Create an oidc redirect url for this pizza client
+    '''
+    p = urlparse(request.url_root)
+    if scheme is None:
+        scheme = p.scheme
+    return ParseResult(
+        scheme, p.netloc, '/oidc/callback', p.params, p.query, p.fragment
+    ).geturl()
 
 
 def user(session):
@@ -50,7 +66,21 @@ def before_request():
         request.user = 'user@example.com'
 
 
+def oidc_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if app.config['AUTH_ENABLED'] == False:
+            return f(*args, **kwargs)
+        elif app.config.get('CLIENT_ID', '') and app.config.get('CLIENT_SECRET', ''):
+            return f(*args, **kwargs)
+        else:
+            return app.send_static_file('register.html')
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/')
+@oidc_required
 def index():
     if request.user:
         response = app.send_static_file('index.html')
@@ -63,12 +93,17 @@ def index():
 
 @app.route('/<path:path>')
 def static_proxy(path):
-  # send_static_file will guess the correct MIME type
-  return app.send_static_file(path)
+    if path.rsplit('.', 1)[-1] not in ['html', 'js', 'css']:
+        return abort(404)
+    # send_static_file will guess the correct MIME type
+    return app.send_static_file(path)
 
 
 @app.route('/oidc/callback')
 def oidc_callback():
+    '''
+    Handle the odic login redirect
+    '''
     if 'error' in request.args:
         return 'Auth error: {}'.format(request.args['error']), 200
     elif 'code' in request.args:
@@ -89,7 +124,7 @@ def oidc_callback():
             'nonce': req_state,
             'client_id': app.config['CLIENT_ID'],
             'client_secret': app.config['CLIENT_SECRET'],
-            'redirect_uri': app.config['REDIRECT_URI'],
+            'redirect_uri': url_for_redirect(),
             'grant_type': 'authorization_code',
         }
         resp = requests.post(app.config['TOKEN_URL'], params=data)
@@ -121,13 +156,16 @@ def oidc_callback():
 
 @app.route('/login')
 def login():
+    '''
+    Start the oidc login process
+    '''
     session['state'] = base64.b64encode(os.urandom(10))
     session['nonce'] = base64.b64encode(os.urandom(10))
     params = {
         'state': session['state'],
         'response_type': 'code',
         'client_id': app.config['CLIENT_ID'],
-        'redirect_uri': app.config['REDIRECT_URI'],
+        'redirect_uri': url_for_redirect(),
         'scope': 'openid email',
         'nonce': session['nonce'],
     }
@@ -137,6 +175,9 @@ def login():
 
 @app.route('/logout')
 def logout():
+    '''
+    Logout the current user
+    '''
     session.clear()
     response = redirect('/')
     response.set_cookie('user', expires=0)
@@ -144,10 +185,43 @@ def logout():
     return response
 
 
-
+@app.route('/register', methods=['POST'])
+def register():
+    '''
+    Register this pizza client with the trusona idp. Persist the credentials in
+    a file (.oidc-creds.yml)
+    '''
+    if app.config.get('CLIENT_ID', '') and app.config.get('CLIENT_SECRET', ''):
+        return 'invalid request', 422
+    p = urlparse(request.url_root)
+    client_identifier = "{}@{}".format(os.getlogin(), os.uname().nodename)
+    client_data = {
+        'client_name': 'Trusona Pizza Client - Daniel Wozniak - {}'.format(client_identifier),
+        'redirect_uris': [],
+    }
+    client_data['redirect_uris'].append(url_for_redirect('http'))
+    client_data['redirect_uris'].append(url_for_redirect('https'))
+    headers={
+        'Content-Type': 'application/json'
+    }
+    response = requests.post(
+        app.config['REGISTRATION_URI'], data=json.dumps(client_data), headers=headers
+    )
+    if response.status_code != 201:
+        app.error("Something went wrong: %s", response.text[:300])
+        return response.text, 500
+    app.logger.info("Got json reponse: %s", response.json())
+    data = {
+        'CLIENT_NAME': response.json()['client_name'],
+        'CLIENT_ID': response.json()['client_id'],
+        'CLIENT_SECRET': response.json()['client_secret']
+    }
+    with open('.oidc-creds.yml', 'w') as fp:
+        fp.write(yaml.dump(data, default_flow_style=False))
+    app.config.update(data)
+    return redirect('/')
 
 
 if __name__ == "__main__":
-
     configure(app)
     app.run(host="0.0.0.0", port=5000, debug=True)

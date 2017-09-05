@@ -8,7 +8,7 @@ body {
 header {
   text-align: center;
 }
-#pizzaClient {
+#pizzaClient, .content-main {
   background-color: #f9f9f9;
 }
 img.logo {
@@ -42,15 +42,22 @@ a {
 span.badge-primary, div.badge-primary, button.btn-primary {
   background-color: #7b46d1;
 }
+button.btn-primary,
 .navbar button.btn-primary {
+  border-width: 0px;
   background-color: #f9f9f9;
   color: #7b46d1;
 }
-.navbar button.btn-primary:hover, .navbar button.btn-primary.show, .show>.btn-primary.dropdown-toggle {
+button.btn-primary:hover,
+button.btn-primary.show,
+.navbar button.btn-primary:hover,
+.navbar button.btn-primary.show, 
+.show>.btn-primary.dropdown-toggle {
   color: #e3e3e3;
   background-color: #7b46d1;
   border: 0px;
   border-width: 0px;
+  border-color: #7b46d1;
 }
 .navbar .nav-link.active {
   color: #fff;
@@ -76,7 +83,11 @@ ul.nav-tabs, .navbar button {
 .nav-tabs .nav-item {
   margin-bottom: 0px;
 }
-li.nav-item, .nav-tabs .nav-link, .navbar button, .dropdown-menu {
+li.nav-item,
+.nav-tabs
+.nav-link,
+.navbar button.btn,
+.dropdown-menu {
   border: 0px;
   border-width: 0px;
   margin-bottom: 0px;

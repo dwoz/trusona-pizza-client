@@ -1,0 +1,3 @@
+[submodule "pizza_server"]
+	path = pizza_server
+	url = git@github.com:dwoz/pizza_server.git

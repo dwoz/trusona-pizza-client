@@ -1,0 +1,5 @@
+flask
+webargs
+requests
+pyjwt
+PyYaml

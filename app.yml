@@ -1,0 +1,9 @@
+CLIENT_NAME: "Trusona Pizza Client - Daniel Wozniak"
+AUTH_URL: "https://idp.trusona.com/authorizations/openid"
+TOKEN_URL: "https://idp.trusona.com/openid/token"
+USERINFO_URL: "https://idp.trusona.com/openid/userinfo"
+REDIRECT_URI: "http://trusona-pizza-client.woz.io/oidc/callback"
+PIZZA_SERVER: "http://pizza_server:3000/"
+APP_SECRET: "tlXmvITyUQFlZQwAGxK9rMWaHKbXzmF2cZcmfYOPs1gIh4zBivpJdB6HPujyHKCW"
+DEBUG: True
+AUTH_ENABLED: False

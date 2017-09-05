@@ -1,0 +1,98 @@
+body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  color: #4A4A4A;
+  background-color: #515151;
+}
+header {
+  text-align: center;
+}
+#pizzaClient {
+  background-color: #f9f9f9;
+}
+img.logo {
+  margin-top: 26px;
+  margin-left: auto;
+  margin-bottom: 26px;
+  margin-right: auto;
+}
+div.tab-pane {
+  margin: 10px;
+}
+#toppings, #pizzas {
+  padding: 10px;
+  margin: 5px;
+}
+#toppings span {
+  padding: 5px;
+  margin: 10px;
+}
+#pizzas .card {
+  margin: 10px;
+}
+footer {
+  text-align: center;
+  color: #9B9B9B;
+  margin: 20px;
+}
+a {
+  color: #7b46d1;
+}
+span.badge-primary, div.badge-primary, button.btn-primary {
+  background-color: #7b46d1;
+}
+.navbar button.btn-primary {
+  background-color: #f9f9f9;
+  color: #7b46d1;
+}
+.navbar button.btn-primary:hover, .navbar button.btn-primary.show, .show>.btn-primary.dropdown-toggle {
+  color: #e3e3e3;
+  background-color: #7b46d1;
+  border: 0px;
+  border-width: 0px;
+}
+.navbar .nav-link.active {
+  color: #fff;
+  background-color: #7b46d1;
+}
+.navbar .nav-link:hover {
+  color: #e3e3e3;
+  background-color: #7b46d1;
+}
+.navbar {
+  padding: 0px;
+}
+.navbar div.container {
+  padding: 0px;
+}
+.container-fluid {
+  padding: 0px;
+}
+ul.nav-tabs, .navbar button {
+ border: 0px;
+ border-bottom-width: 0px;
+}
+.nav-tabs .nav-item {
+  margin-bottom: 0px;
+}
+li.nav-item, .nav-tabs .nav-link, .navbar button, .dropdown-menu {
+  border: 0px;
+  border-width: 0px;
+  margin-bottom: 0px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+#pizzaClient div.tab-pane {
+ margin: 0px;
+ padding: 15px;
+}
+input#pizza-description {
+ margin-left: -1px;
+}
+.form-control:focus, .uneditable-input:focus {
+  border-color: #7b46d1;
+  /* box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6); */
+}

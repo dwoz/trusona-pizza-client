@@ -1,0 +1,6 @@
+
+*.pyc
+venv
+jasmine/
+.oidc-creds.yml
+.env.mk

@@ -39,15 +39,26 @@ def configure(app, paths=['app.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
             app.logger.warn("Config file not found: %s", path)
 
 
+def url_root(scheme=None):
+    p = urlparse(request.url_root)
+    app.logger.info("req scheme %s", request.url_root)
+    if scheme is None:
+        if request.headers.get('X-Forwarded-Proto', 'http') == 'https':
+            scheme = 'https'
+        else:
+            scheme = p.scheme
+    return ParseResult(
+        scheme, p.netloc, p.path, p.params, p.query, p.fragment
+    ).geturl()
+
+
 def url_for_redirect(scheme=None):
     '''
     Create an oidc redirect url for this pizza client
     '''
-    p = urlparse(request.url_root)
-    if scheme is None:
-        scheme = p.scheme
+    p = urlparse(url_root(scheme))
     return ParseResult(
-        scheme, p.netloc, '/oidc/callback', p.params, p.query, p.fragment
+        p.scheme, p.netloc, '/oidc/callback', p.params, p.query, p.fragment
     ).geturl()
 
 
@@ -60,8 +71,8 @@ def user(session):
 @app.before_request
 def before_request():
     request.user = None
-    if 'id_token' in session:
-        request.user = user(session)
+    if 'user' in session:
+        request.user = session['user']
     elif app.config['AUTH_ENABLED'] == False:
         request.user = 'user@example.com'
 
@@ -112,6 +123,7 @@ def oidc_callback():
         req_state = request.args['state'].encode('utf-8')
         session_nonce = session.pop('nonce', '')
         session_state = session.pop('state', '')
+        session.clear()
         if req_nonce != session_nonce or req_state != session_state:
             app.logger.error("req_nonce %s", repr(req_nonce))
             app.logger.error("session_nonce %s", repr(session_nonce))
@@ -143,6 +155,7 @@ def oidc_callback():
             app.logger.error("Invalid token")
             return 'invalid jwt token', 200
         session['id_token'] = id_token
+        session['user'] = user(session)
         # headers = {
         #     'Authorization': '{} {}'.format(token_data['token_type'], token_data['access_token'])
         # }
@@ -189,10 +202,10 @@ def logout():
 def config_json():
     if app.config['AUTH_ENABLED']:
         if not session.get('user', ''):
-            return 'unauthroized', 401
-    server_url = app.config.get('PIZZA_SERVER', request.url_root)
+            return abort(401)
+    server_url = app.config.get('PIZZA_SERVER', url_root())
     if app.config['USE_PROXY']:
-        server_url = request.url_root
+        server_url = url_root()
     config = {
         'user': session.get('user', 'user@examplecom'),
         'pizza_server_url': server_url,
@@ -240,69 +253,61 @@ def register():
 proxy = Blueprint('pizza_proxy', __name__)
 
 
-@proxy.route('/toppings', methods=['GET', 'POST'])
-def toppings():
-    server_url = app.config.get('PIZZA_SERVER', '')
-    req_url = '{}/toppings'.format(server_url)
+@proxy.before_request
+def proxy_before():
+    request.user = None
+    if 'user' in session:
+        request.user = session['user']
+    elif app.config['AUTH_ENABLED'] == False:
+        request.user = 'user@example.com'
+    if not request.user:
+        return abort(401)
+
+
+def proxy_method(url):
     if request.method == 'GET':
-        resp = requests.get('{}/toppings'.format(server_url))
+        app.logger.info("Proxy get request %s", url)
+        resp = requests.get(url)
         if resp.status_code != 200:
             app.logger.error(resp.text[:200])
+            if app.debug:
+                return resp.content, resp.status_code
             abort(500)
         return jsonify(resp.json())
     elif request.method == 'POST':
-        resp = requests.post(req_url, json=request.get_json())
+        data = request.get_json()
+        app.logger.info("Proxy post request %s %s", url, data)
+        resp = requests.post(url, json=data)
         if resp.status_code != 200:
             app.logger.error(
                 'Unexpected response status=%s content=%s',
                 resp.status_code, resp.text[:200]
             )
-            return resp.content, resp.status_code
+            if app.debug:
+                return resp.content, resp.status_code
             abort(500)
         return jsonify(resp.json())
+
+
+@proxy.route('/toppings', methods=['GET', 'POST'])
+def toppings():
+    server_url = app.config.get('PIZZA_SERVER', '')
+    req_url = '{}/toppings'.format(server_url)
+    return proxy_method(req_url)
 
 
 @proxy.route('/pizzas', methods=['GET', 'POST'])
 def pizzas():
     server_url = app.config.get('PIZZA_SERVER', '')
     req_url = '{}/pizzas'.format(server_url)
-    if request.method == 'GET':
-        resp = requests.get(req_url)
-        if resp.status_code != 200:
-            app.logger.error(resp.text[:200])
-            return resp.content, resp.status_code
-            abort(500)
-        return jsonify(resp.json())
-    elif request.method == 'POST':
-        resp = requests.post(req_url, json=request.get_json())
-        if resp.status_code != 201:
-            app.logger.error(
-                'Unexpected response status=%s content=%s',
-                resp.status_code, resp.text[:200]
-            )
-            abort(500)
-        return jsonify(resp.json()), 201
+    return proxy_method(req_url)
 
 
 @proxy.route('/pizzas/<id>/toppings', methods=['GET', 'POST'])
 def pizza_toppings(id):
     server_url = app.config.get('PIZZA_SERVER', '')
     req_url = '{}/pizzas/{}/toppings'.format(server_url, id)
-    if request.method == 'GET':
-        resp = requests.get(req_url)
-        if resp.status_code != 200:
-            app.logger.error(resp.text[:200])
-            abort(500)
-        return jsonify(resp.json())
-    elif request.method == 'POST':
-        resp = requests.post(req_url, json=request.get_json())
-        if resp.status_code != 200:
-            app.logger.error(
-                'Unexpected response status=%s content=%s',
-                resp.status_code, resp.text[:200]
-            )
-            abort(500)
-        return jsonify(resp.json())
+    return proxy_method(req_url)
 
 
 app.register_blueprint(proxy)

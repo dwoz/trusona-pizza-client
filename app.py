@@ -9,6 +9,7 @@ import yaml
 import json
 from functools import wraps
 from flask import g, request, redirect, url_for
+from werkzeug.contrib.fixers import ProxyFix
 
 
 DEFAULTS = {
@@ -309,4 +310,7 @@ app.register_blueprint(proxy)
 
 if __name__ == "__main__":
     configure(app)
+    num_proxies = int(app.config.get('PROXIES', 0))
+    if num_proxies > 0:
+        ProxyFix(app, num_proxies=num_proxies)
     app.run(host="0.0.0.0", port=5000, debug=True)

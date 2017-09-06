@@ -2,7 +2,7 @@ describe("Initialize pizza client", function() {
 
     var onReady;
     var toppingsRegex = /pizzas\/([0-9]+)\/toppings$/;
-    var client = pizzaClient('http://192.168.99.100');
+    var client = pizzaClient('');
     var Toppings = [
         {id: 1, name: "Cheese"},
         {id: 2, name: "Pepperoni"},

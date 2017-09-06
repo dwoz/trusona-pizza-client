@@ -57,7 +57,12 @@ pizzaClient = (function() {
             var input = $("#topping");
             var data = {'topping': {'name': input.val()}};
             input.val('');
-            $.post(this.url('toppings'), data, this.addToppingCb.bind(this));
+            $.ajax(this.url('toppings'), {
+                data : JSON.stringify(data),
+                contentType : 'application/json',
+                type : 'POST',
+                success: this.addToppingCb.bind(this)
+            });
         },
         'addPizzaCb': function(data) {
             var pizzas = $("#pizzas");
@@ -86,7 +91,12 @@ pizzaClient = (function() {
             var name = $("#pizza").val();
             var description = $("#pizza-description").val();
             var data = {'pizza': {'name': name, 'description': description}};
-            $.post(this.url('pizzas'), data, this.addPizzaCb.bind(this));
+            $.ajax(this.url('pizzas'), {
+                data : JSON.stringify(data),
+                contentType : 'application/json',
+                type : 'POST',
+                success: this.addPizzaCb.bind(this)
+            });
             $("#pizza").val('');
             $("#pizza-description").val('');
         },
@@ -137,7 +147,13 @@ pizzaClient = (function() {
             var post_data = {'topping_id': id};
             var url = this.url('pizzatoppings', pizza.id);
             $("#addPizzaToppings").modal('hide');
-            $.post(url, post_data, this.addPizzaToppingCb.bind(this));
+            //$.post(url, post_data, this.addPizzaToppingCb.bind(this));
+            $.ajax(url, {
+                data : JSON.stringify(post_data),
+                contentType : 'application/json',
+                type : 'POST',
+                success: this.addPizzaToppingCb.bind(this)
+            });
         },
         'updatePizzaToppings': function(id, div) {
             if (div === undefined) {

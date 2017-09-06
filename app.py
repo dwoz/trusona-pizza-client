@@ -246,11 +246,17 @@ def toppings():
     if request.method == 'GET':
         resp = requests.get('{}/toppings'.format(server_url))
         if resp.status_code != 200:
+            app.logger.error(resp.text[:200])
             abort(500)
         return jsonify(resp.json())
     elif request.method == 'POST':
-        resp = requests.post(req_url, data=request.get_json())
-        if resp.status_code != 201:
+        resp = requests.post(req_url, json=request.get_json())
+        if resp.status_code != 200:
+            app.logger.error(
+                'Unexpected response status=%s content=%s',
+                resp.status_code, resp.text[:200]
+            )
+            return resp.content, resp.status_code
             abort(500)
         return jsonify(resp.json())
 
@@ -262,13 +268,19 @@ def pizzas():
     if request.method == 'GET':
         resp = requests.get(req_url)
         if resp.status_code != 200:
+            app.logger.error(resp.text[:200])
+            return resp.content, resp.status_code
             abort(500)
         return jsonify(resp.json())
     elif request.method == 'POST':
-        resp = requests.post(req_url, data=request.get_json())
+        resp = requests.post(req_url, json=request.get_json())
         if resp.status_code != 201:
+            app.logger.error(
+                'Unexpected response status=%s content=%s',
+                resp.status_code, resp.text[:200]
+            )
             abort(500)
-        return jsonify(resp.json())
+        return jsonify(resp.json()), 201
 
 
 @proxy.route('/pizzas/<id>/toppings', methods=['GET', 'POST'])
@@ -278,11 +290,16 @@ def pizza_toppings(id):
     if request.method == 'GET':
         resp = requests.get(req_url)
         if resp.status_code != 200:
+            app.logger.error(resp.text[:200])
             abort(500)
         return jsonify(resp.json())
     elif request.method == 'POST':
-        resp = requests.post(req_url, data=request.get_json())
-        if resp.status_code != 201:
+        resp = requests.post(req_url, json=request.get_json())
+        if resp.status_code != 200:
+            app.logger.error(
+                'Unexpected response status=%s content=%s',
+                resp.status_code, resp.text[:200]
+            )
             abort(500)
         return jsonify(resp.json())
 

@@ -30,8 +30,6 @@ pizzaClient = (function() {
             this.config = config;
         };
         this.base_url = sanitizeUrl(url);
-        this.toppings = $('#toppings');
-        this.pizzas = $('#pissaz');
         this.availableToppings = {};
         this.availablePizzas = {};
     };
@@ -49,7 +47,8 @@ pizzaClient = (function() {
         },
         'addToppingCb': function(data) {
              var item = $('<option>').attr({'value': data.id}).text(data.name);
-             this.toppings.append(item);
+             var toppings = $('#toppings');
+             toppings.append(item);
              this.updateToppings();
         },
         // returns an Array of toppings
@@ -250,7 +249,9 @@ pizzaClient = (function() {
             return div;
         },
         'onReady': function(evt) {
+            var tpl = $('#templates div[name=pizzaClient]');
             var user = getCookie("user").replace(/\"/g, "");
+            $("#pizzaClient").html(tpl.html());
             $("#logout").html(user);
             $('#add-topping').click(this.addTopping.bind(this));
             $('#add-pizza').click(this.addPizza.bind(this));

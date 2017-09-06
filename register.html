@@ -17,21 +17,21 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"  crossorigin="anonymous"></script>
   </head>
   <body>
-    <header class="container">
+    <header>
       <img class="logo" src="https://idp.trusona.com/img/logo-white.svg" size="80%" />
     </header>
-    <div class="container">
+    <div class="container-fluid">
       <div class="row">
-        <div class="col-md-8 offset-md-2 content-main" style="padding-bottom: 15px;">
+        <div class="content col-md-8 offset-md-2 container-fluid">
           <h1>Trusona IdP Registration</h1>
-          <form method="POST" action="/register">
+          <form method="POST" action="/register" style="padding-bottom: 15px;">
             <label for="submit">Register this Pizza client with the Trusona IdP</label>
             <button id="submit" type="submit" class="form-control btn btn-primary">Register Now</button>
           </form>
         </div>
       </div>
     </div>
-    <footer class="container-flex">
+    <footer>
       <div>&copy; 2017 Trusona. All rights reserved.</div>
     </footer>
   </body>

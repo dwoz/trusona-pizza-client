@@ -32,101 +32,101 @@
     </header>
     <div class="container">
       <div class="row">
-        <div id="pizzaClient" class="container-fluid">
-          <nav class="navbar navbar-fixed-top">
-            <div class="nav-item">
-              <ul class="nav nav-tabs">
-                <li class="nav-item"><a href="#pizzas-tab" data-toggle="tab" class="nav-link active">Pizzas</a></li>
-                <li class="nav-item"><a href="#toppings-tab" data-toggle="tab" class="nav-link">Toppings</a></li>
-              </ul>
+        <div id="pizzaClient" class="container-fluid content"></div>
+      </div>
+    </div>
+    <footer class="container-flex">
+      <div>&copy; 2017 Trusona. All rights reserved.</div>
+    </footer>
+    <div id="templates" style="display:none">
+      <!-- Pizza card -->
+      <div name="pizza" class="col-md-6">
+        <div class="card" sytle="width: 20rem">
+          <div class="card-header">
+           <h5 name="name" class="card-title"></h5>
+          </div>
+          <div class="card-body">
+            <b>Description</b>
+            <div class="card-sub-title">
+              <span name="description"></span>
             </div>
-            <div class="nav-item">
-              <div class="btn-group">
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="fa fa-user mr-2" aria-hidden="true"></span><span id="logout">User</span>
-                </button>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="/logout">Logout</a>
-                </div>
-              </div>
-            </div>
-          </nav>
-          <div class="tab-content clearfix">
-            <div id="pizzas-tab" class="tab-pane active">
-              <div id="pizzas" class="container-fluid">
-              </div>
-              <div class="container">
-                <legend for="addPizzaCtls">Add Pizza</legend>
-                <div id="addPizzaCtls" class="input-group">
-                  <input id="pizza" class="form-control" placeholder="Name"  />
-                  <input id="pizza-description" class="form-control" placeholder="Description"  />
-                  <span class="input-group-btn">
-                    <button id="add-pizza" class="btn btn-secondary" type="button">Add</button>
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div id="toppings-tab" class="tab-pane container-fluid">
-              <div id="toppings" class="container-fluid">
-              </div>
-              <div class="container">
-                <legend for="addToppingCtls">Add Topping</legend>
-                <div id="addToppingCtls" class="input-group">
-                  <input id="topping" class="form-control" placeholder="Topping Name" />
-                  <span class="input-group-btn">
-                    <button id="add-topping" class="btn btn-secondary" type="button">Add</button>
-                  </span>
-                </div>
-              </div>
+            <b>Toppings <span name="add-pizza-topping" class="fa fa-plus" aria-hidden="true"></span></b>
+            <div class="pizza-toppings card-text">
             </div>
           </div>
         </div>
-        <div id="templates" style="display:none">
-          <!-- Pizza card -->
-          <div name="pizza" class="col-md-6">
-            <div class="card" sytle="width: 20rem">
-              <div class="card-header">
-               <h5 name="name" class="card-title"></h5>
+      </div>
+      <div name="pizzaClient">
+        <nav class="navbar navbar-fixed-top">
+          <div class="nav-item">
+            <ul class="nav nav-tabs">
+              <li class="nav-item"><a href="#pizzas-tab" data-toggle="tab" class="nav-link active">Pizzas</a></li>
+              <li class="nav-item"><a href="#toppings-tab" data-toggle="tab" class="nav-link">Toppings</a></li>
+            </ul>
+          </div>
+            <div class="btn-group">
+              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="fa fa-user mr-2" aria-hidden="true"></span><span id="logout">User</span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="/logout">Logout</a>
               </div>
-              <div class="card-body">
-                <b>Description</b>
-                <div class="card-sub-title">
-                  <span name="description"></span>
-                </div>
-                <b>Toppings <span name="add-pizza-topping" class="fa fa-plus" aria-hidden="true"></span></b>
-                <div class="pizza-toppings card-text">
-                </div>
+            </div>
+        </nav>
+        <div class="tab-content clearfix">
+          <div id="pizzas-tab" class="tab-pane active">
+            <div id="pizzas" class="container-fluid">
+            </div>
+            <div class="container">
+              <legend for="addPizzaCtls">Add Pizza</legend>
+              <div id="addPizzaCtls" class="input-group">
+                <input id="pizza" class="form-control" placeholder="Name"  />
+                <input id="pizza-description" class="form-control" placeholder="Description"  />
+                <span class="input-group-btn">
+                  <button id="add-pizza" class="btn btn-secondary" type="button">Add</button>
+                </span>
               </div>
             </div>
           </div>
-        </div>
-        <div id="addPizzaToppings" name="addPizzaToppings" class="modal fade">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Add a Pizza Topping</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p>Select the topping you would like to add</p>
-                <div class="input-group">
-                  <select name="availableToppings" class="form-control selectpicker" data-live-search="true">
-                  </select>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button name="add-pizza-topping" type="button" class="btn btn-primary">Add Topping</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <div id="toppings-tab" class="tab-pane container-fluid">
+            <div id="toppings" class="container-fluid">
+            </div>
+            <div class="container">
+              <legend for="addToppingCtls">Add Topping</legend>
+              <div id="addToppingCtls" class="input-group">
+                <input id="topping" class="form-control" placeholder="Name" />
+                <span class="input-group-btn">
+                  <button id="add-topping" class="btn btn-secondary" type="button">Add</button>
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <footer class="container-flex">
-      <div>&copy; 2017 Trusona. All rights reserved.</div>
-    </footer>
+    <!-- Add pizza topping modal -->
+    <div id="addPizzaToppings" name="addPizzaToppings" class="modal fade">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add a Pizza Topping</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Select the topping you would like to add</p>
+            <div class="input-group">
+              <select name="availableToppings" class="form-control selectpicker" data-live-search="true">
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button name="add-pizza-topping" type="button" class="btn btn-primary">Add Topping</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

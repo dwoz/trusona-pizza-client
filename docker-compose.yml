@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 services:
   db:
     image: postgres
@@ -17,6 +17,5 @@ services:
       dockerfile: Dockerfile-haproxy
     ports:
       - "80:80"
-      - "443:443"
     depends_on:
       - web2

@@ -17,11 +17,13 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"  crossorigin="anonymous"></script>
     <script src="pizzaClient.js"></script>
     <script>
-      /*
-       * Create a new pizza client pointing to the pizza server
-       */
-      client = pizzaClient('http://192.168.99.100');
-      $(document).ready(client.onReady.bind(client));
+      $.getJSON('config.json', function(config) {
+        /*
+         * Create a new pizza client pointing to the pizza server
+         */
+        client = pizzaClient(config.pizza_server_url);
+        $(document).ready(client.onReady.bind(client));
+      });
     </script>
   </head>
   <body>

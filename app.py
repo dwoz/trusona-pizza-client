@@ -1,7 +1,7 @@
 import base64
 import os
 from urllib.parse import urlencode, urlparse, ParseResult
-from flask import Flask, request, session, redirect, url_for, Blueprint, abort
+from flask import Flask, request, session, redirect, url_for, Blueprint, abort, jsonify
 import webargs
 import requests
 import jwt
@@ -184,6 +184,21 @@ def logout():
     return response
 
 
+@app.route('/config.json')
+def config_json():
+    if app.config['AUTH_ENABLED']:
+        if not session.get('user', ''):
+            return 'unauthroized', 401
+    server_url = app.config.get('PIZZA_SERVER', request.url_root)
+    if app.config['USE_PROXY']:
+        server_url = request.url_root
+    config = {
+        'user': session.get('user', 'user@examplecom'),
+        'pizza_server_url': server_url,
+    }
+    return jsonify(config)
+
+
 @app.route('/register', methods=['POST'])
 def register():
     '''
@@ -219,6 +234,60 @@ def register():
         fp.write(yaml.dump(data, default_flow_style=False))
     app.config.update(data)
     return redirect('/')
+
+
+proxy = Blueprint('pizza_proxy', __name__)
+
+
+@proxy.route('/toppings', methods=['GET', 'POST'])
+def toppings():
+    server_url = app.config.get('PIZZA_SERVER', '')
+    req_url = '{}/toppings'.format(server_url)
+    if request.method == 'GET':
+        resp = requests.get('{}/toppings'.format(server_url))
+        if resp.status_code != 200:
+            abort(500)
+        return jsonify(resp.json())
+    elif request.method == 'POST':
+        resp = requests.post(req_url, data=request.get_json())
+        if resp.status_code != 201:
+            abort(500)
+        return jsonify(resp.json())
+
+
+@proxy.route('/pizzas', methods=['GET', 'POST'])
+def pizzas():
+    server_url = app.config.get('PIZZA_SERVER', '')
+    req_url = '{}/pizzas'.format(server_url)
+    if request.method == 'GET':
+        resp = requests.get(req_url)
+        if resp.status_code != 200:
+            abort(500)
+        return jsonify(resp.json())
+    elif request.method == 'POST':
+        resp = requests.post(req_url, data=request.get_json())
+        if resp.status_code != 201:
+            abort(500)
+        return jsonify(resp.json())
+
+
+@proxy.route('/pizzas/<id>/toppings', methods=['GET', 'POST'])
+def pizza_toppings(id):
+    server_url = app.config.get('PIZZA_SERVER', '')
+    req_url = '{}/pizzas/{}/toppings'.format(server_url, id)
+    if request.method == 'GET':
+        resp = requests.get(req_url)
+        if resp.status_code != 200:
+            abort(500)
+        return jsonify(resp.json())
+    elif request.method == 'POST':
+        resp = requests.post(req_url, data=request.get_json())
+        if resp.status_code != 201:
+            abort(500)
+        return jsonify(resp.json())
+
+
+app.register_blueprint(proxy)
 
 
 if __name__ == "__main__":

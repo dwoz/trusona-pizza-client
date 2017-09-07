@@ -16,6 +16,6 @@ services:
       context: .
       dockerfile: Dockerfile-haproxy
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - web2

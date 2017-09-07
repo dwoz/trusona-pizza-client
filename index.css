@@ -34,10 +34,14 @@ div.tab-pane {
 #pizzas .card {
   margin: 15px;
 }
-footer {
+footer,
+footer a {
   text-align: center;
   color: #9B9B9B;
   margin: 20px;
+}
+footer a:hover {
+  color: #f1f1f1;
 }
 a {
   color: #7b46d1;

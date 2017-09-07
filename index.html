@@ -27,16 +27,37 @@
     </script>
   </head>
   <body>
-    <header class="container">
+    <header class="container-fluid">
       <img class="logo" src="https://idp.trusona.com/img/logo-white.svg" size="80%" />
     </header>
-    <div class="container">
+    <div class="container-fluid">
       <div class="row">
-        <div id="pizzaClient" class="container-fluid content"></div>
+        <div id="pizzaClient" class="container-fluid content col-md-8 col-md-2"></div>
       </div>
     </div>
-    <footer class="container-flex">
-      <div>&copy; 2017 Trusona. All rights reserved.</div>
+    <footer class="container-fluid">
+      <div class="row">
+        <div class="col-md-8 offset-md-2 container-fluid">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-4">
+                <a href="/">Home</a>
+              </div>
+              <div class="col-md-4">
+                <a href="#">Help</a>
+              </div>
+              <div class="col-md-4">
+                <a href="/test.html">Tests</a>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 offset-md-4 container-fluid">
+                &copy; 2017 Trusona. All rights reserved.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </footer>
     <div id="templates" style="display:none">
       <!-- Pizza card -->

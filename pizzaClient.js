@@ -1,3 +1,9 @@
+if (!Array.from) {
+    Array.from = function (object) {
+        'use strict';
+        return [].slice.call(object);
+    };
+}
 pizzaClient = (function() {
     function getCookie(input) {
         var cookies = document.cookie.split(';');
@@ -250,7 +256,14 @@ pizzaClient = (function() {
         },
         'onReady': function(evt) {
             var tpl = $('#templates div[name=pizzaClient]');
-            var user = getCookie("user").replace(/\"/g, "");
+            var cookie_data = getCookie("user");
+            var user;
+            if (cookie_data === null || cookie_data === undefined) {
+              // TODO: this should come from config instead of cookie value
+              user = "No User Cookie";
+            } else {
+              user = cookie_data;
+            }
             $("#pizzaClient").html(tpl.html());
             $("#logout").html(user);
             $('#add-topping').click(this.addTopping.bind(this));

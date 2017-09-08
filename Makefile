@@ -1,15 +1,43 @@
+#!/usr/bin/make -f
 
-# Create a make file of the docker-machine environment
-IGNORE := $(shell bash -c "if which docker-machine; then docker-machine env > .env.mk; source .env.mk; env | sed 's/=/:=/' | sed 's/^/export /' > .env.mk; fi")
--include .env.mk
+#SHELL = bash
+.PHONY: all run rund clean build insall-jasmine uninstall-jasmine
 
-all: clean build
+#
+# Docker machine environment
+#
+
+# Create a make file of the docker-machine environment, including .env here aswell
+IGNORE := $(shell bash -c "if which docker-machine; then\
+	docker-machine env > .docker-machine.mk; \
+	env -i bash -c \"source .docker-machine.mk; \
+        source .env; env | \
+	sed 's/=/:=/' | sed 's/^/export /' > .docker-machine.mk;\"; \
+        fi")
+-include .docker-machine.mk
+
+DOCKER_MACHINE_NAME := $(DOCKER_MACHINE_NAME)
+DOCKER_TLS_VERIFY := $(DOCKER_TLS_VERIFY)
+PWD := $(PWD)
+DOCKER_CERT_PATH := $(DOCKER_CERT_PATH)
+SHLVL := $(SHLVL)
+
+
+
+main: build
+
+run: build
 	docker-compose up
 
+rund: build
+	docker-compose up -d
+
 clean:
+	find . -type d -name __pycache__ -exec rm -rf {} +
+	python setup.py clean
 	docker-compose rm -f;
 
-build:
+build: clean
 	docker-compose build
 
 install-jasmine:

@@ -16,18 +16,18 @@ describe("Initialize pizza client", function() {
     var PizzaToppings = {
         1: Array.from([
             {"id": 1, "pizza_id": 1, "topping_id": 1, "name": "Cheese"}]),
-        2: Array.from([ 
+        2: Array.from([
             {"id": 2, "pizza_id": 2, "topping_id": 1, "name": "Cheese"},
             {"id": 3, "pizza_id": 2, "topping_id": 2, "name": "Pepperoni"}
         ]),
-        3: Array.from([ 
+        3: Array.from([
             {"id": 4, "pizza_id": 3, "topping_id": 1, "name": "Cheese"},
             {"id": 5, "pizza_id": 3, "topping_id": 3, "name": "Sausage"}
         ])
     };
 
     beforeAll(function() {
-        onReady = spyOn(client, 'onReady').and.callThrough(); 
+        onReady = spyOn(client, 'onReady').and.callThrough();
         $(document).ready(client.onReady.bind(client));
     });
 

@@ -1,0 +1,7 @@
+*.pyc
+.cache
+*/__pycache__/*
+ghostdriver.log
+.git
+venv
+trusona_pizza_client.egg-info

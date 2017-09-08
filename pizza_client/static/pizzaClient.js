@@ -60,6 +60,10 @@ pizzaClient = (function() {
         // returns an Array of toppings
         'addTopping': function(evt) {
             var input = $("#topping");
+            if (input.val().trim() == "") {
+                this.showMessage("Name required");
+                return;
+            }
             var data = {'topping': {'name': input.val()}};
             input.val('');
             $.ajax(this.url('toppings'), {
@@ -93,8 +97,12 @@ pizzaClient = (function() {
             }
         },
         'addPizza': function() {
-            var name = $("#pizza").val();
-            var description = $("#pizza-description").val();
+            var name = $("#pizza").val().trim();
+            if (name == "") {
+                this.showMessage("Name required");
+                return;
+            };
+            var description = $("#pizza-description").val().trim();
             var data = {'pizza': {'name': name, 'description': description}};
             $.ajax(this.url('pizzas'), {
                 data : JSON.stringify(data),
@@ -105,7 +113,7 @@ pizzaClient = (function() {
             $("#pizza").val('');
             $("#pizza-description").val('');
         },
-        'addPizzaTopping': function(evt) {
+        'showAddPizzaTopping': function(evt) {
             var pizza_id = evt.data.id;
             var availableToppings = [];
             var pizzaToppingIds = [];
@@ -119,6 +127,10 @@ pizzaClient = (function() {
                 // true when the available topping is not already a pizza topping
                 return pizzaToppingIds.indexOf(x.id) == -1;
             });
+            if (availableToppings.length == 0) {
+                this.showMessage("No toppings available to add.");
+                return;
+            }
             var addPizzaToppingsDiv = $('#addPizzaToppings');
             var toppings = addPizzaToppingsDiv.find('select[name=availableToppings]');
             toppings.html('');
@@ -134,6 +146,11 @@ pizzaClient = (function() {
                 evt.data, this.addPizzaToppingSubmit.bind(this)
             );
             addPizzaToppingsDiv.modal('show');
+        },
+        'showMessage': function(message, kind) {
+                var msg = $("#templates div[name=error-message]").clone();
+                msg.find('span[name=message]').html(message);
+                $('#status-message').html('').append(msg);
         },
         'addPizzaToppingCb': function(data) {
             if (Object.keys(data.errors).length > 0) {
@@ -251,7 +268,7 @@ pizzaClient = (function() {
             a.click(this.togglePizzaInfo.bind(div));
             div.find('span[name=description]').text(data.description);
             this.updatePizzaToppings(data.id, div.find('.pizza-toppings'));
-            div.find('span[name=add-pizza-topping]').click(data, this.addPizzaTopping.bind(this));
+            div.find('span[name=add-pizza-topping]').click(data, this.showAddPizzaTopping.bind(this));
             return div;
         },
         'onReady': function(evt) {

@@ -11,7 +11,7 @@ setup(
     entry_points = {
         'console_scripts': ['pizza-client=pizza_client.app:main'],
     },
-    version = '0.0.1',
+    version = '0.0.2',
     description = (
         'An implimentation of the Trusona pizza client'
     ),

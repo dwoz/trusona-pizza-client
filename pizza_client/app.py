@@ -12,6 +12,7 @@ from flask import (
 import webargs
 import requests
 import jwt
+import ast
 import yaml
 import json
 from functools import wraps
@@ -27,19 +28,29 @@ DEFAULTS = {
     'TOKEN_URL': 'https://idp.trusona.com/openid/token',
     'USERINFO_URL':  'https://idp.trusona.com/openid/userinfo',
     'REGISTRATION_URI': 'https://idp.trusona.com/openid/clients',
-    'CLIENT_ID': os.environ.get('CLIENT_ID', ''),
-    'CLIENT_SECRET': os.environ.get('CLIENT_SECRET', ''),
-    'SECRET_KEY': os.environ.get('SECRET_KEY',  base64.b64encode(os.urandom(36))),
+    'PIZZA_SERVER': 'http://pizza_server:3000',
     'DEBUG': False,
+    'USE_PROXY': True,
     'AUTH_ENABLED': True,
+    'SECRET_KEY': base64.b64encode(os.urandom(36)),
+    'CLIENT_ID': '',
+    'CLIENT_SECRET': '',
 }
+ENV = (
+    'CLIENT_ID',
+    'CLIENT_SECRET',
+    'SECRET_KEY',
+    'AUTH_ENABLED',
+    'PIZZA_SERVER',
+    'USE_PROXY',
+)
 
 
 app = Flask(__name__)
 app.register_blueprint(proxy)
 
 
-def configure(app, paths=['pizza-client.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
+def configure(app, paths=['pizza-client.yml', '.oidc-creds.yml'], defaults=DEFAULTS, env=ENV):
     '''
     The main app configuration
     '''
@@ -50,29 +61,53 @@ def configure(app, paths=['pizza-client.yml', '.oidc-creds.yml'], defaults=DEFAU
                 app.config.update(yaml.safe_load(fp.read()))
         except FileNotFoundError as exc:
             app.logger.warn("Config file not found: %s", path)
+    for var in env:
+        if var in os.environ:
+            # Convert bool literals
+            try:
+                val = ast.literal_eval(os.environ[var])
+            except SyntaxError:
+                val = os.environ[var]
+            app.config[var] = val
+    #print(app.config)
 
 
 def main():
     '''
     The main app entrypoint
     '''
+    print("FROM {}".format(__name__))
     configure(app)
     num_proxies = int(app.config.get('PROXIES', 0))
     if num_proxies > 0:
         ProxyFix(app, num_proxies=num_proxies)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    for x in app.config:
+        print("CONFIG {} {}".format(x, repr(app.config[x])))
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=True)
 
 
 @app.before_request
 def before_request():
     '''
-    Populate the request user
+     - Respond to OPTIONS requests
+     - Populate the request user
     '''
+    app.logger.error(os.environ)
+    if request.method == 'OPTIONS':
+        return make_response('', 200)
     request.user = None
     if 'user' in session:
         request.user = session['user']
     elif app.config['AUTH_ENABLED'] == False:
         request.user = 'user@example.com'
+
+
+@app.after_request
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST'
+    return response
 
 
 def oidc_required(f):
@@ -259,7 +294,3 @@ def register():
         fp.write(yaml.dump(data, default_flow_style=False))
     app.config.update(data)
     return redirect('/')
-
-
-if __name__ == "__main__":
-    main()

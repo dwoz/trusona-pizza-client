@@ -11,13 +11,14 @@ pizza_client/static/jasmine/
 venv
 
 # Make environment file
-.env.mk
+.docker-machine.mk
 
 # This app's openid connect credentials (created by the register controller)
 .oidc-creds.yml
 
 # pytest .cache dir
 .cache/
+__pycache__
 
 # phantomjs log file
 ghostdriver.log

@@ -1,3 +1,7 @@
+'''
+Collect Jasmine tests from a url using selenium webdriver and display the
+results durring a pytest run.
+'''
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium import webdriver

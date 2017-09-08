@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, session, current_app as app
+from flask import request, session, redirect, current_app as app
 from urllib.parse import urlencode, urlparse, ParseResult
 
 
@@ -13,10 +13,8 @@ def oidc_required(f):
             return f(*args, **kwargs)
         elif app.config.get('CLIENT_ID', '') and app.config.get('CLIENT_SECRET', ''):
             return f(*args, **kwargs)
-        elif do_redirect:
-            return redirect('/register')
         else:
-            return abort(401)
+            return redirect('/register')
         return f(*args, **kwargs)
     return wrapper_function
 

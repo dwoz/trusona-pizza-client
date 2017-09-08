@@ -1,3 +1,6 @@
+'''
+Config and fixtures for pytest
+'''
 from pizza_client.app import app
 
 import pytest
@@ -44,6 +47,7 @@ def client():
     app.config.update(
         SERVER_NAME='testing.dev:5000',
         SECRET_KEY='secret',
+        USE_PROXY=True,
     )
     app.testing = True
     client = app.test_client()

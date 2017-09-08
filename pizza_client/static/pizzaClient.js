@@ -11,15 +11,15 @@ pizzaClient = (function() {
     }
     var _pizzaClient = function(config) {
         this.config = {
-           url: '/',
-           user: 'user@example.com',
-           container: 'pizzaClient',
-           endpoints: {
-               toppings: '/toppings',
-               pizzas: '/pizzas',
-               pizzatoppings: '/pizzas/%ID%/toppings',
-         }
-       }
+            url: '/',
+            user: 'user@example.com',
+            container: 'pizzaClient',
+            endpoints: {
+                toppings: '/toppings',
+                pizzas: '/pizzas',
+                pizzatoppings: '/pizzas/%ID%/toppings',
+            }
+        }
         if (config !== undefined) {
             this.config['url'] = config['url'];
             this.config['user'] = config['user'];

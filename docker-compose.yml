@@ -2,20 +2,20 @@ version: '2'
 services:
   db:
     image: postgres
-  web:
+  pizza_server:
     image: trusona/pizza-server
     build: pizza_server
     depends_on:
       - db
-  web2:
+  pizza_client:
     build: .
     depends_on:
-      - web
+      - pizza_server
   haproxy:
     build:
-      context: .
+      context: pizza_client/extra
       dockerfile: Dockerfile-haproxy
     ports:
       - "8080:80"
     depends_on:
-      - web2
+      - pizza_client

@@ -1,12 +1,12 @@
 describe("Initialize pizza client", function() {
 
     var onReady;
-    var toppingsRegex = /pizzas\/([0-9]+)\/toppings$/;
     var config = {
-      'url': 'http://192.168.100.99:8080',
+      'url': 'http://192.168.99.100:8080/',
       'user': 'user@example.com'
     };
     var client = pizzaClient(config);
+    var toppingsRegex = /pizzas\/([0-9]+)\/toppings$/;
     var Toppings = [
         {id: 1, name: "Cheese"},
         {id: 2, name: "Pepperoni"},
@@ -31,11 +31,6 @@ describe("Initialize pizza client", function() {
     };
 
     beforeAll(function() {
-        onReady = spyOn(client, 'onReady').and.callThrough();
-        $(document).ready(client.onReady.bind(client));
-    });
-
-    beforeEach(function() {
         var getPizzaToppings = function(req, res) {
             var match = toppingsRegex.exec(res.url);
             res.respondWith({
@@ -46,24 +41,32 @@ describe("Initialize pizza client", function() {
             });
         }
         jasmine.Ajax.install();
-        jasmine.Ajax.stubRequest(/^.*toppings/).andReturn({
+        jasmine.Ajax.stubRequest('http://192.168.99.100:8080/toppings').andReturn({
             status: 200,
             statusText: 'HTTP/1.1 200 OK',
             contentType: 'application/json',
             responseText: JSON.stringify(Toppings)
         });
-        jasmine.Ajax.stubRequest('http://192.168.100.00:8080/pizzas').andReturn({
+        jasmine.Ajax.stubRequest('http://192.168.99.100:8080/pizzas').andReturn({
             status: 200,
             statusText: 'HTTP/1.1 200 OK',
             contentType: 'application/json',
             responseText: JSON.stringify(Pizzas)
         });
-        jasmine.Ajax.stubRequest('http://192.168.100.00:8080/pizzas/1/toppings').andCallFunction(getPizzaToppings);
-        jasmine.Ajax.stubRequest('http://192.168.100.00:8080/pizzas/2/toppings').andCallFunction(getPizzaToppings);
-        jasmine.Ajax.stubRequest('http://192.168.100.00:8080/pizzas/3/toppings').andCallFunction(getPizzaToppings);
+        jasmine.Ajax.stubRequest('http://192.168.99.100:8080/pizzas/1/toppings').andCallFunction(getPizzaToppings);
+        jasmine.Ajax.stubRequest('http://192.168.99.100:8080/pizzas/2/toppings').andCallFunction(getPizzaToppings);
+        jasmine.Ajax.stubRequest('http://192.168.99.100:8080/pizzas/3/toppings').andCallFunction(getPizzaToppings);
+        onReady = spyOn(client, 'onReady').and.callThrough();
+        $(document).ready(client.onReady.bind(client));
     });
 
-    afterEach(function() {
+//    beforeEach(function() {
+//    });
+//
+//    afterEach(function() {
+//        jasmine.Ajax.uninstall();
+//    });
+    afterAll(function() {
         jasmine.Ajax.uninstall();
     });
 
@@ -87,7 +90,7 @@ describe("Initialize pizza client", function() {
             var checkDone = function() {
                 var pizzaDivs = $('#pizzas div[name=pizza]');
                 var pizzaToppings = pizzaDivs.find('div.pizza-toppings > span.badge');
-                if (pizzaDivs.length === 3 && pizzaToppings.length ===5) {
+                if (pizzaDivs.length === 3 && pizzaToppings.length === 5) {
                     //expect(Object.keys(client.availablePizzas).length).toBe(3);
                     done();
                 } else {
@@ -97,7 +100,6 @@ describe("Initialize pizza client", function() {
             checkDone();
             });
         });
-        //expect(Object.keys(client.availablePizzas[2].toppings).length).toBe(2);
         it("Client has availableToppings", function() {
             expect(Object.keys(client.availableToppings).length).toBe(3);
         });
@@ -112,9 +114,6 @@ describe("Initialize pizza client", function() {
     });
 
     describe("Check Ui", function() {
-//        it("Autofail", function() {
-//            expect(true).toBe(false);
-//        });
         it("Clicking toppings tab shows toppings", function() {
             expect($('#toppings-tab').is(':visible')).toBe(false);
             $("a[href*=toppings-tab]").trigger('click');

@@ -3,9 +3,14 @@
 
 1. [Pizza Client](#pizza-client)
     1. [Technology](#technology)
+    2. [Repository Layout](#repository-layout)
 2. [Run Locally](#running-pizza-client-locally)
 3. [Develop Locally](#develop-locally)
-
+    1. [Setting up a python virtual environment](#setting-up-a-python-virtual-environment)
+    2. [Running the app](#running-the-app)
+    3. [Running the tests](#running-the-tests)
+      * [Python tests](#python-tests)
+      * [Javascript tests](#javascript-tests)
 
 ## Pizza Client
 
@@ -29,6 +34,13 @@ pizza_client. In this configuration all pizza server requests go through the
 client. See the [haproxy.cfg](pizza_client/extra/haproxy.cfg) file for more
 details.
 
+### Repository Layout
+
+- The python code is located in the [pizza_client/](https://github.com/dwoz/trusona-pizza-client/tree/master/pizza_client) directory.
+- Python py.test tests are under the [tests/](https://github.com/dwoz/trusona-pizza-client/tree/master/tests) directory
+- The code for the client side javascript app is in the [pizza_client/static/pizzaClient.js](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/static/pizzaClient.js) file.
+- The javascript app uses html templates, these templates are located in the main layout temlate [layout.html](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/templates/layout.html)
+- The Jasmin javascript test suite can be found in the [pizza_client/static/testPizzaClient.js](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/static/pizzaClient.js) file
 
 ## Running Pizza Client Locally
 
@@ -52,4 +64,45 @@ make run
 
 ## Develop Locally
 
-Jasmine tests are available via the '/test.html' page.
+It may be handy to run the pizza client app without docker. You should be able to run the app in a python virutal environment provided you have python3 installed. You can install python3 via homebrew `homebrew install python3`.
+
+### Setting up a python virtual environment
+
+```bash
+git clone --recursive git@github.com:dwoz/trusona-pizza-client.git
+cd trusona-pizza-client
+virtualenv venv --python=python3
+source venv/bin/activate
+pip install -r requirements.txt
+python setup.py develop
+```
+
+### Running the app
+
+You'll need to make sure the virutal environment is activated. If following the steps above you'll already have an activated virtual environment. If you open a new shell, you'll need to `source venv/bin/activate` before running the app.
+
+```bash
+source venv/bin/activate
+pizza-client
+```
+
+### Running the tests
+
+There are two test suites; a python based test suite and javascript tests.
+
+#### Python tests
+
+```bash
+py.test -v
+```
+
+#### Javascript tests
+
+You can run the Jasmine javascript tests in your browser by visiting the '/test.html' page of the app.
+
+Alternatively, you can install phantomjs and run the javascript tests along side the python tests.
+
+```bash
+brew install phantomjs
+py.test -v --with-jasmine=http://192.168.99.100:8080/test.html
+```

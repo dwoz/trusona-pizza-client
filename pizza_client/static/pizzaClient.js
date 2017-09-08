@@ -5,19 +5,6 @@ if (!Array.from) {
     };
 }
 pizzaClient = (function() {
-    function getCookie(input) {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var name = cookies[i].split('=')[0].toLowerCase();
-            if (name === input) {
-                var value = cookies[i].split('=')[1].toLowerCase();
-                return value;
-            } else if (value === input) {
-                return name;
-            }
-        }
-        return null;
-    };
     function sanitizeUrl(url)
     {
         return url.replace(/\/$/, "");
@@ -275,16 +262,6 @@ pizzaClient = (function() {
         },
         'onReady': function(evt) {
             var tpl = $('#templates div[name=pizzaClient]');
-            /*
-            var cookie_data = getCookie("user");
-            var user;
-            if (cookie_data === null || cookie_data === undefined) {
-              // TODO: this should come from config instead of cookie value
-              user = "No User Cookie";
-            } else {
-              user = cookie_data;
-            }
-            */
             $("#pizzaClient").html(tpl.html());
             $("#logout").html(this.config.user);
             $('#add-topping').click(this.addTopping.bind(this));

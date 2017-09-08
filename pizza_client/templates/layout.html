@@ -22,6 +22,17 @@
       crossorigin="anonymous"></script>
     {% block scripts %}
     {% endblock %}
+    {% if config.get('GOOGLE_ANALYTICS_PROPERTY', '') %}
+		<!-- Global Site Tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id={{ config['GOOGLE_ANALYTICS_PROPERTY'] }}"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments)};
+			gtag('js', new Date());
+
+			gtag('config', '{{ config['GOOGLE_ANALYTICS_PROPERTY'] }}');
+		</script>
+    {% endif %}
   </head>
   <body>
     <header class="container-fluid">

@@ -17,7 +17,7 @@ import json
 from functools import wraps
 from werkzeug.contrib.fixers import ProxyFix
 from .pizza_proxy import proxy
-from .common import url_root, url_for_redirect
+from .common import url_root, url_for_redirect, user
 
 
 
@@ -39,7 +39,7 @@ app = Flask(__name__)
 app.register_blueprint(proxy)
 
 
-def configure(app, paths=['app.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
+def configure(app, paths=['pizza-client.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
     '''
     The main app configuration
     '''
@@ -218,6 +218,7 @@ def config_json():
     '''
     Render the current javascript app config as json
     '''
+    app.logger.warn("CONFIG %s", app.config)
     if app.config['AUTH_ENABLED']:
         if not session.get('user', ''):
             return abort(401)

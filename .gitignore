@@ -14,7 +14,7 @@ venv
 .env.mk
 
 # This app's openid connect credentials (created by the register controller)
-pizza_client/.oidc-creds.yml
+.oidc-creds.yml
 
 # pytest .cache dir
 .cache/

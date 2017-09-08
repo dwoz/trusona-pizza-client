@@ -116,15 +116,6 @@ def test_html():
     return render_template('test.html')
 
 
-@app.route('/<path:path>')
-def static_proxy(path):
-    #TODO: remove this
-    if path.rsplit('.', 1)[-1] not in ['html', 'js', 'css', 'png']:
-        return abort(404)
-    # send_static_file will guess the correct MIME type
-    return app.send_static_file(path)
-
-
 @app.route('/oidc/callback')
 def oidc_callback():
     '''

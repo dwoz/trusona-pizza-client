@@ -1,5 +1,13 @@
 {% extends "layout.html" %}
+{% block links %}
+<link rel="shortcut icon" type="image/png" href="static/jasmine/lib/jasmine-2.8.0/jasmine_favicon.png">
+<link rel="stylesheet" type="text/css" href="static/jasmine/lib/jasmine-2.8.0/jasmine.css">
+{% endblock %}
 {% block scripts %}
-    <script src="pizzaClient.js"></script>
-    <script src="testPizzaClient.js"></script>
+<script type="text/javascript" src="static/jasmine/lib/jasmine-2.8.0/jasmine.js"></script>
+<script type="text/javascript" src="static/jasmine/lib/jasmine-2.8.0/jasmine-html.js"></script>
+<script type="text/javascript" src="static/jasmine/lib/jasmine-2.8.0/boot.js"></script>
+<script type="text/javascript" src="static/jasmine/mock-ajax.js"></script>
+<script src="static/pizzaClient.js"></script>
+<script src="static/testPizzaClient.js"></script>
 {% endblock %}

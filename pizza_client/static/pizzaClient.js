@@ -22,20 +22,22 @@ pizzaClient = (function() {
     {
         return url.replace(/\/$/, "");
     }
-    var _pizzaClient = function(url, config) {
-        if (config === undefined) {
-            this.config = {
-                container: 'pizzaClient',
-                endpoints: {
-                    toppings: '/toppings',
-                    pizzas: '/pizzas',
-                    pizzatoppings: '/pizzas/%ID%/toppings',
-              }
-            }
-        } else {
-            this.config = config;
+    var _pizzaClient = function(config) {
+        this.config = {
+           url: '/',
+           user: 'user@example.com',
+           container: 'pizzaClient',
+           endpoints: {
+               toppings: '/toppings',
+               pizzas: '/pizzas',
+               pizzatoppings: '/pizzas/%ID%/toppings',
+         }
+       }
+        if (config !== undefined) {
+            this.config['url'] = config['url'];
+            this.config['user'] = config['user'];
         };
-        this.base_url = sanitizeUrl(url);
+        this.base_url = sanitizeUrl(this.config.url);
         this.availableToppings = {};
         this.availablePizzas = {};
     };
@@ -273,6 +275,7 @@ pizzaClient = (function() {
         },
         'onReady': function(evt) {
             var tpl = $('#templates div[name=pizzaClient]');
+            /*
             var cookie_data = getCookie("user");
             var user;
             if (cookie_data === null || cookie_data === undefined) {
@@ -281,16 +284,17 @@ pizzaClient = (function() {
             } else {
               user = cookie_data;
             }
+            */
             $("#pizzaClient").html(tpl.html());
-            $("#logout").html(user);
+            $("#logout").html(this.config.user);
             $('#add-topping').click(this.addTopping.bind(this));
             $('#add-pizza').click(this.addPizza.bind(this));
             this.updateToppings();
             this.updatePizzas();
         }
     };
-    function pizzaClient(url) {
-        return new _pizzaClient(url);
+    function pizzaClient(config) {
+        return new _pizzaClient(config);
     };
     return pizzaClient;
 }());

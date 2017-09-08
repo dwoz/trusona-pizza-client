@@ -15,10 +15,9 @@ import jwt
 import ast
 import yaml
 import json
-from functools import wraps
 from werkzeug.contrib.fixers import ProxyFix
 from .pizza_proxy import proxy
-from .common import url_root, url_for_redirect, user
+from .common import url_root, url_for_redirect, user, js_config, oidc_required
 
 
 
@@ -110,24 +109,6 @@ def after_request(response):
     return response
 
 
-def oidc_required(f):
-    '''
-    A decorator function which will require authentication to access the endpoint
-    '''
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if app.config['AUTH_ENABLED'] == False:
-            return f(*args, **kwargs)
-        elif app.config.get('CLIENT_ID', '') and app.config.get('CLIENT_SECRET', ''):
-            return f(*args, **kwargs)
-        else:
-            app.logger.error("register")
-            return redirect('/register')
-            return app.send_static_file('register.html')
-        return f(*args, **kwargs)
-    return decorated_function
-
-
 @app.route('/')
 @oidc_required
 def index():
@@ -135,7 +116,7 @@ def index():
     Pizza client appliction index page
     '''
     if request.user:
-        response = Response(render_template('index.html'))
+        response = Response(render_template('index.html', js_config=js_config()))
         response.set_cookie('user', request.user)
         return response
     response = redirect(url_for('login'))
@@ -237,25 +218,6 @@ def logout():
     response.set_cookie('user', expires=0)
     app.save_session(session, response)
     return response
-
-
-@app.route('/config.json')
-def config_json():
-    '''
-    Render the current javascript app config as json
-    '''
-    app.logger.warn("CONFIG %s", app.config)
-    if app.config['AUTH_ENABLED']:
-        if not session.get('user', ''):
-            return abort(401)
-    server_url = app.config.get('PIZZA_SERVER', url_root())
-    if app.config['USE_PROXY']:
-        server_url = url_root()
-    config = {
-        'user': session.get('user', 'user@examplecom'),
-        'pizza_server_url': server_url,
-    }
-    return jsonify(config)
 
 
 @app.route('/register', methods=['GET', 'POST'])

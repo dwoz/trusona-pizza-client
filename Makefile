@@ -1,6 +1,6 @@
 
 # Create a make file of the docker-machine environment
-IGNORE := $(shell bash -c "docker-machine env > .env.mk; source .env.mk; env | sed 's/=/:=/' | sed 's/^/export /' > .env.mk")
+IGNORE := $(shell bash -c "if which docker-machine; then docker-machine env > .env.mk; source .env.mk; env | sed 's/=/:=/' | sed 's/^/export /' > .env.mk; fi")
 -include .env.mk
 
 all: clean build

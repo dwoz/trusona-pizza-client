@@ -60,12 +60,6 @@ describe("Initialize pizza client", function() {
         $(document).ready(client.onReady.bind(client));
     });
 
-//    beforeEach(function() {
-//    });
-//
-//    afterEach(function() {
-//        jasmine.Ajax.uninstall();
-//    });
     afterAll(function() {
         jasmine.Ajax.uninstall();
     });

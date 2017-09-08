@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block scripts %}
+<script src="pizzaClient.js"></script>
+<script>
+  $.getJSON('config.json', function(config) {
+    /*
+     * Create a new pizza client pointing to the pizza server
+     */
+    client = pizzaClient(config.pizza_server_url);
+    $(document).ready(client.onReady.bind(client));
+  });
+</script>
+{% endblock %}

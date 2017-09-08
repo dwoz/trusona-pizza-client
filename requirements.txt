@@ -3,3 +3,6 @@ webargs
 requests
 pyjwt
 PyYaml
+pytest
+httmock
+selenium

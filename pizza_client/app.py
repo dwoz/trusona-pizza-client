@@ -1,15 +1,24 @@
+'''
+The main pizza client flask application. The flask app provides authentication
+to the pizza client and server.
+'''
 import base64
 import os
-from urllib.parse import urlencode, urlparse, ParseResult
-from flask import Flask, request, session, redirect, url_for, Blueprint, abort, jsonify
+from urllib.parse import urlencode
+from flask import (
+    Flask, g, request, session, redirect, url_for, abort, jsonify, render_template,
+    Response,
+)
 import webargs
 import requests
 import jwt
 import yaml
 import json
 from functools import wraps
-from flask import g, request, redirect, url_for
 from werkzeug.contrib.fixers import ProxyFix
+from .pizza_proxy import proxy
+from .common import url_root, url_for_redirect
+
 
 
 DEFAULTS = {
@@ -26,10 +35,14 @@ DEFAULTS = {
 }
 
 
-app = Flask(__name__, static_folder='')
+app = Flask(__name__)
+app.register_blueprint(proxy)
 
 
 def configure(app, paths=['app.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
+    '''
+    The main app configuration
+    '''
     app.config.update(defaults)
     for path in paths:
         try:
@@ -39,37 +52,22 @@ def configure(app, paths=['app.yml', '.oidc-creds.yml'], defaults=DEFAULTS):
             app.logger.warn("Config file not found: %s", path)
 
 
-def url_root(scheme=None):
-    p = urlparse(request.url_root)
-    app.logger.info("req scheme %s", request.url_root)
-    if scheme is None:
-        if request.headers.get('X-Forwarded-Proto', 'http') == 'https':
-            scheme = 'https'
-        else:
-            scheme = p.scheme
-    return ParseResult(
-        scheme, p.netloc, p.path, p.params, p.query, p.fragment
-    ).geturl()
-
-
-def url_for_redirect(scheme=None):
+def main():
     '''
-    Create an oidc redirect url for this pizza client
+    The main app entrypoint
     '''
-    p = urlparse(url_root(scheme))
-    return ParseResult(
-        p.scheme, p.netloc, '/oidc/callback', p.params, p.query, p.fragment
-    ).geturl()
-
-
-def user(session):
-    'Extract the user from the session info'
-    # TODO: Where does the extra quoting come from ?
-    return session['id_token']['emails'][0].strip('"')
+    configure(app)
+    num_proxies = int(app.config.get('PROXIES', 0))
+    if num_proxies > 0:
+        ProxyFix(app, num_proxies=num_proxies)
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
 
 @app.before_request
 def before_request():
+    '''
+    Populate the request user
+    '''
     request.user = None
     if 'user' in session:
         request.user = session['user']
@@ -78,6 +76,9 @@ def before_request():
 
 
 def oidc_required(f):
+    '''
+    A decorator function which will require authentication to access the endpoint
+    '''
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if app.config['AUTH_ENABLED'] == False:
@@ -85,6 +86,8 @@ def oidc_required(f):
         elif app.config.get('CLIENT_ID', '') and app.config.get('CLIENT_SECRET', ''):
             return f(*args, **kwargs)
         else:
+            app.logger.error("register")
+            return redirect('/register')
             return app.send_static_file('register.html')
         return f(*args, **kwargs)
     return decorated_function
@@ -93,8 +96,11 @@ def oidc_required(f):
 @app.route('/')
 @oidc_required
 def index():
+    '''
+    Pizza client appliction index page
+    '''
     if request.user:
-        response = app.send_static_file('index.html')
+        response = Response(render_template('index.html'))
         response.set_cookie('user', request.user)
         return response
     response = redirect(url_for('login'))
@@ -102,9 +108,18 @@ def index():
     return response
 
 
+@app.route('/test.html')
+def test_html():
+    '''
+    Pizza client jazmine tests
+    '''
+    return render_template('test.html')
+
+
 @app.route('/<path:path>')
 def static_proxy(path):
-    if path.rsplit('.', 1)[-1] not in ['html', 'js', 'css']:
+    #TODO: remove this
+    if path.rsplit('.', 1)[-1] not in ['html', 'js', 'css', 'png']:
         return abort(404)
     # send_static_file will guess the correct MIME type
     return app.send_static_file(path)
@@ -200,6 +215,9 @@ def logout():
 
 @app.route('/config.json')
 def config_json():
+    '''
+    Render the current javascript app config as json
+    '''
     if app.config['AUTH_ENABLED']:
         if not session.get('user', ''):
             return abort(401)
@@ -213,15 +231,16 @@ def config_json():
     return jsonify(config)
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     '''
     Register this pizza client with the trusona idp. Persist the credentials in
     a file (.oidc-creds.yml)
     '''
+    if request.method == 'GET':
+        return render_template('register.html')
     if app.config.get('CLIENT_ID', '') and app.config.get('CLIENT_SECRET', ''):
         return 'invalid request', 422
-    p = urlparse(request.url_root)
     client_identifier = "{}@{}".format(os.getlogin(), os.uname().nodename)
     client_data = {
         'client_name': 'Trusona Pizza Client - Daniel Wozniak - {}'.format(client_identifier),
@@ -250,72 +269,5 @@ def register():
     return redirect('/')
 
 
-proxy = Blueprint('pizza_proxy', __name__)
-
-
-@proxy.before_request
-def proxy_before():
-    request.user = None
-    if 'user' in session:
-        request.user = session['user']
-    elif app.config['AUTH_ENABLED'] == False:
-        request.user = 'user@example.com'
-    if not request.user:
-        return abort(401)
-
-
-def proxy_method(url):
-    if request.method == 'GET':
-        app.logger.info("Proxy get request %s", url)
-        resp = requests.get(url)
-        if resp.status_code != 200:
-            app.logger.error(resp.text[:200])
-            if app.debug:
-                return resp.content, resp.status_code
-            abort(500)
-        return jsonify(resp.json())
-    elif request.method == 'POST':
-        data = request.get_json()
-        app.logger.info("Proxy post request %s %s", url, data)
-        resp = requests.post(url, json=data)
-        if resp.status_code != 200:
-            app.logger.error(
-                'Unexpected response status=%s content=%s',
-                resp.status_code, resp.text[:200]
-            )
-            if app.debug:
-                return resp.content, resp.status_code
-            abort(500)
-        return jsonify(resp.json())
-
-
-@proxy.route('/toppings', methods=['GET', 'POST'])
-def toppings():
-    server_url = app.config.get('PIZZA_SERVER', '')
-    req_url = '{}/toppings'.format(server_url)
-    return proxy_method(req_url)
-
-
-@proxy.route('/pizzas', methods=['GET', 'POST'])
-def pizzas():
-    server_url = app.config.get('PIZZA_SERVER', '')
-    req_url = '{}/pizzas'.format(server_url)
-    return proxy_method(req_url)
-
-
-@proxy.route('/pizzas/<id>/toppings', methods=['GET', 'POST'])
-def pizza_toppings(id):
-    server_url = app.config.get('PIZZA_SERVER', '')
-    req_url = '{}/pizzas/{}/toppings'.format(server_url, id)
-    return proxy_method(req_url)
-
-
-app.register_blueprint(proxy)
-
-
 if __name__ == "__main__":
-    configure(app)
-    num_proxies = int(app.config.get('PROXIES', 0))
-    if num_proxies > 0:
-        ProxyFix(app, num_proxies=num_proxies)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    main()

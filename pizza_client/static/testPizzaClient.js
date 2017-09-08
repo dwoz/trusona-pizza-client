@@ -108,6 +108,9 @@ describe("Initialize pizza client", function() {
     });
 
     describe("Check Ui", function() {
+        it("Autofail", function() {
+            expect(true).toBe(false);
+        });
         it("Clicking toppings tab shows toppings", function() {
             expect($('#toppings-tab').is(':visible')).toBe(false);
             $("a[href*=toppings-tab]").trigger('click');

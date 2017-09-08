@@ -14,9 +14,10 @@ build:
 
 install-jasmine:
 	curl -sSL -o jasmine-standalone-2.8.0.zip https://github.com/jasmine/jasmine/releases/download/v2.8.0/jasmine-standalone-2.8.0.zip
-	unzip jasmine-standalone-2.8.0.zip -d jasmine
+	mkdir -p pizza_client/static/jasmine
+	unzip jasmine-standalone-2.8.0.zip -d pizza_client/static/jasmine
 	rm jasmine-standalone-2.8.0.zip
-	curl -sSL -o jasmine/mock-ajax.js https://raw.githubusercontent.com/jasmine/jasmine-ajax/v3.3.1/lib/mock-ajax.js
+	curl -sSL -o pizza_client/static/jasmine/mock-ajax.js https://raw.githubusercontent.com/jasmine/jasmine-ajax/v3.3.1/lib/mock-ajax.js
 
 uninstall-jasmine:
-	rm -rf jasmine
+	rm -rf pizza_client/static/jasmine

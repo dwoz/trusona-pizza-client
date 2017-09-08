@@ -1,6 +1,23 @@
-
+# python .pyc file
 *.pyc
+
+# Python egg directory created by setup.py
+trusona_pizza_client.egg-info/
+
+# jasmine library directory
+pizza_client/static/jasmine/
+
+# python virtualenv directory
 venv
-jasmine/
-.oidc-creds.yml
+
+# Make environment file
 .env.mk
+
+# This app's openid connect credentials (created by the register controller)
+pizza_client/.oidc-creds.yml
+
+# pytest .cache dir
+.cache/
+
+# phantomjs log file
+ghostdriver.log

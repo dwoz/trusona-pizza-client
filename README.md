@@ -40,7 +40,7 @@ details.
 - Python py.test tests are under the [tests/](https://github.com/dwoz/trusona-pizza-client/tree/master/tests) directory
 - The code for the client side javascript app is in the [pizza_client/static/pizzaClient.js](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/static/pizzaClient.js) file.
 - The javascript app uses html templates, these templates are located in the main layout temlate [layout.html](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/templates/layout.html)
-- The Jasmin javascript test suite can be found in the [pizza_client/static/testPizzaClient.js](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/static/pizzaClient.js) file
+- The Jasmin javascript test suite can be found in the [pizza_client/static/testPizzaClient.js](https://github.com/dwoz/trusona-pizza-client/blob/master/pizza_client/static/testPizzaClient.js) file
 
 ## Running Pizza Client Locally
 

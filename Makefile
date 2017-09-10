@@ -37,15 +37,17 @@ clean:
 	python setup.py clean
 	docker-compose rm -f;
 
-build: clean
+build: clean install-jasmine
 	docker-compose build
 
-install-jasmine:
+pizza_client/static/jasmine:
 	curl -sSL -o jasmine-standalone-2.8.0.zip https://github.com/jasmine/jasmine/releases/download/v2.8.0/jasmine-standalone-2.8.0.zip
 	mkdir -p pizza_client/static/jasmine
 	unzip jasmine-standalone-2.8.0.zip -d pizza_client/static/jasmine
 	rm jasmine-standalone-2.8.0.zip
 	curl -sSL -o pizza_client/static/jasmine/mock-ajax.js https://raw.githubusercontent.com/jasmine/jasmine-ajax/v3.3.1/lib/mock-ajax.js
+
+install-jasmine: pizza_client/static/jasmine
 
 uninstall-jasmine:
 	rm -rf pizza_client/static/jasmine
